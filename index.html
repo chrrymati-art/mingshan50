@@ -1,4 +1,13 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta property="og:title" content="明善寺50週年 三好發願大典 回函">
+<meta property="og:description" content="115年12月20日（日）上午 竹山明善寺 圓通寶殿｜掃碼回覆是否出席">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
 <title>明善寺50週年回函</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,7 +84,8 @@ input[aria-invalid="true"]{border-color:var(--red)}
 .mic span{font-size:13px;font-weight:700}
 .mic.on{background:var(--red);color:#fffaf1;border-color:var(--red)}
 .hint{font-size:14px;color:var(--muted);line-height:1.6}
-.req{color:var(--red)}
+.field small.req{color:var(--red)}
+.stepper output .pick{font-size:18px;color:var(--gold);font-weight:700;margin:0}
 </style>
 
 <main class="card">
@@ -119,7 +129,7 @@ input[aria-invalid="true"]{border-color:var(--red)}
     <h2 class="q">歡迎您回到明善寺</h2>
     <p class="sub">留下聯絡方式，我們好為您準備位子</p>
     <div class="field">
-      <label for="count">參加人數 <small>（含您本人）</small></label>
+      <label for="count">參加人數 <small class="req">（必填）</small> <small>含您本人</small></label>
       <div class="stepper">
         <button type="button" id="minus" aria-label="減少一位">−</button>
         <output id="count" aria-live="polite">1<span>位</span></output>
@@ -127,15 +137,17 @@ input[aria-invalid="true"]{border-color:var(--red)}
       </div>
     </div>
     <div class="field">
-      <label for="meal">用齋人數 <small>（中午留下來用齋的人數）</small></label>
+      <label for="meal">用齋人數 <small class="req">（必填）</small> <small>中午留下來用齋的人數</small></label>
       <div class="stepper">
         <button type="button" id="meal-minus" aria-label="減少一位用齋">−</button>
-        <output id="meal" aria-live="polite">1<span>位</span></output>
+        <output id="meal" aria-live="polite">請選擇</output>
         <button type="button" id="meal-plus" aria-label="增加一位用齋">＋</button>
       </div>
+      <div class="hint">請按 ＋ 選人數；沒有要用齋，請按 − 選「不用齋」</div>
+      <div class="err" id="meal-err"></div>
     </div>
     <div class="field">
-      <label for="phone">電話號碼</label>
+      <label for="phone">電話號碼 <small class="req">（必填）</small></label>
       <input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="例如：0912-345-678" maxlength="20">
       <div class="err" id="phone-err"></div>
     </div>
@@ -203,7 +215,7 @@ input[aria-invalid="true"]{border-color:var(--red)}
 
 <script>
 // 接上 Google 試算表後，把 Apps Script 的網址貼在這裡；留空就是預覽模式
-const SCRIPT_URL = "";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDiIBnfVk6n5vCmKqtsh8IocNAspL-rQ7eXnpT9GsRYebQtxQnkGrifY6Neuu01NWO/exec";
 
 const $ = id => document.getElementById(id);
 const steps = ["s-ask","s-no","s-form","s-confirm","s-done","s-already"];
@@ -214,11 +226,12 @@ const fmtMeal = m => m ? m + " 位" : "不用齋";
 function fill(prefix, d){ $(prefix+"-name").textContent=d.name || "（未填，我們會來電）"; $(prefix+"-phone").textContent=d.phone; $(prefix+"-count").textContent=d.count+" 位"; $(prefix+"-meal").textContent=fmtMeal(d.meal); }
 let pending = null, sending = false;
 function show(id){ steps.forEach(s => $(s).hidden = s !== id); window.scrollTo({top:0,behavior:"smooth"}); }
-let count = 1, meal = 1, mealTouched = false;
+let count = 1, meal = null, mealTouched = false;
 function renderCount(){
-  if(!mealTouched || meal > count) meal = count;
+  if(meal !== null && meal > count) meal = count;
   $("count").innerHTML = count + "<span>位</span>"; $("minus").disabled = count<=1; $("plus").disabled = count>=20;
-  $("meal").innerHTML = (meal===0 ? "不用齋" : meal + "<span>位</span>"); $("meal-minus").disabled = meal<=0; $("meal-plus").disabled = meal>=count;
+  $("meal").innerHTML = (meal===null ? '<span class="pick">請選擇</span>' : meal===0 ? "不用齋" : meal + "<span>位</span>"); $("meal-minus").disabled = meal===0; $("meal-plus").disabled = meal!==null && meal>=count;
+  if(meal!==null) $("meal-err").textContent = "";
 }
 renderCount();
 if(!SCRIPT_URL) $("demo-note").hidden = false;
@@ -246,7 +259,7 @@ $("modify").onclick = () => {
   const p = load(); if(p){ $("name").value=p.name; $("phone").value=p.phone; count=p.count; meal=p.meal; mealTouched=true; renderCount(); }
   show("s-form");
 };
-$("other").onclick = () => { $("name").value=""; $("phone").value=""; count=1; mealTouched=false; renderCount(); show("s-ask"); };
+$("other").onclick = () => { $("name").value=""; $("phone").value=""; count=1; meal=null; renderCount(); show("s-ask"); };
 
 $("btn-yes").onclick = () => show("s-form");
 $("btn-no").onclick = () => show("s-no");
@@ -254,8 +267,8 @@ $("back-from-no").onclick = () => show("s-form");
 $("back-from-form").onclick = () => show("s-ask");
 $("minus").onclick = () => { if(count>1){count--;renderCount();} };
 $("plus").onclick = () => { if(count<20){count++;renderCount();} };
-$("meal-minus").onclick = () => { if(meal>0){meal--;mealTouched=true;renderCount();} };
-$("meal-plus").onclick = () => { if(meal<count){meal++;mealTouched=true;renderCount();} };
+$("meal-minus").onclick = () => { if(meal===null) meal=0; else if(meal>0) meal--; renderCount(); };
+$("meal-plus").onclick = () => { if(meal===null) meal=1; else if(meal<count) meal++; renderCount(); };
 
 function mark(id, msg){ $(id+"-err").textContent = msg; if(msg) $(id).setAttribute("aria-invalid","true"); else $(id).removeAttribute("aria-invalid"); return !msg; }
 function check(){
@@ -269,8 +282,10 @@ function check(){
   if(!digits) phoneMsg = "請填寫電話號碼";
   else if(digits.startsWith("09") && digits.length !== 10) phoneMsg = "手機號碼是 10 碼，目前是 " + digits.length + " 碼";
   else if(!digits.startsWith("0") || digits.length < 9 || digits.length > 10) phoneMsg = "請填寫手機（0912345678）或市話（含區碼，如 049xxxxxxx）";
-  const ok = mark("name", nameMsg) & mark("phone", phoneMsg);
-  if(!ok){ (nameMsg ? $("name") : $("phone")).focus(); return null; }
+  const mealMsg = meal===null ? "請選擇用齋人數" : "";
+  $("meal-err").textContent = mealMsg;
+  const ok = mark("name", nameMsg) & mark("phone", phoneMsg) & !mealMsg;
+  if(!ok){ if(mealMsg) $("meal-plus").focus(); else (phoneMsg ? $("phone") : $("name")).focus(); return null; }
   const phone = digits.startsWith("09") ? digits.replace(/(\d{4})(\d{3})(\d{3})/,"$1-$2-$3") : digits;
   return {name, phone, phoneKey: digits, count, meal};
 }
@@ -305,4 +320,5 @@ $("send").onclick = async () => {
 };
 </script>
 
-</body></html>
+</body>
+</html>
