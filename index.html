@@ -1,13 +1,4 @@
-<!doctype html>
-<html lang="zh-Hant">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta property="og:title" content="明善寺50週年 三好發願大典 回函">
-<meta property="og:description" content="115年12月20日（日）上午 竹山明善寺 圓通寶殿｜掃碼回覆是否出席">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
-</head>
-<body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>明善寺50週年回函</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -84,6 +75,7 @@ input[aria-invalid="true"]{border-color:var(--red)}
 .mic span{font-size:13px;font-weight:700}
 .mic.on{background:var(--red);color:#fffaf1;border-color:var(--red)}
 .hint{font-size:14px;color:var(--muted);line-height:1.6}
+.req{color:var(--red)}
 </style>
 
 <main class="card">
@@ -148,12 +140,12 @@ input[aria-invalid="true"]{border-color:var(--red)}
       <div class="err" id="phone-err"></div>
     </div>
     <div class="field">
-      <label for="name">聯絡姓名 <small>（不方便打字可以跳過）</small></label>
+      <label for="name">聯絡姓名 <small class="req">（必填）</small></label>
       <div class="with-mic">
         <input id="name" name="name" autocomplete="name" placeholder="例如：王小明" maxlength="30">
         <button type="button" class="mic" id="mic" aria-label="用說的輸入姓名" hidden>🎤<span>用說的</span></button>
       </div>
-      <div class="hint" id="name-hint">點一下姓名欄，鍵盤上方若出現您的名字，直接點它就好。<br>也可以按鍵盤上的 🎤 用說的，或用手寫。空著也能送出，我們會來電確認。</div>
+      <div class="hint" id="name-hint">點一下姓名欄，鍵盤上方若出現您的名字，直接點它就好。<br>也可以按鍵盤上的 🎤 用說的，或用手寫。不方便填寫，請來電 049-2642840。</div>
       <div class="err" id="name-err"></div>
     </div>
     <button class="btn yes" id="submit" type="submit">下一步：確認資料</button>
@@ -211,7 +203,7 @@ input[aria-invalid="true"]{border-color:var(--red)}
 
 <script>
 // 接上 Google 試算表後，把 Apps Script 的網址貼在這裡；留空就是預覽模式
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxDiIBnfVk6n5vCmKqtsh8IocNAspL-rQ7eXnpT9GsRYebQtxQnkGrifY6Neuu01NWO/exec";
+const SCRIPT_URL = "";
 
 const $ = id => document.getElementById(id);
 const steps = ["s-ask","s-no","s-form","s-confirm","s-done","s-already"];
@@ -234,7 +226,7 @@ if(!SCRIPT_URL) $("demo-note").hidden = false;
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 if(SR){
   const mic = $("mic"); mic.hidden = false;
-  $("name-hint").innerHTML = "點一下姓名欄，鍵盤上方若出現您的名字，直接點它就好。<br>或按「🎤 用說的」說出名字。空著也能送出，我們會來電確認。";
+  $("name-hint").innerHTML = "點一下姓名欄，鍵盤上方若出現您的名字，直接點它就好。<br>或按「🎤 用說的」說出名字。不方便填寫，請來電 049-2642840。";
   let rec = null;
   mic.onclick = () => {
     if(rec){ rec.stop(); return; }
@@ -271,7 +263,8 @@ function check(){
   // 全形數字轉半形，只留數字
   const digits = $("phone").value.replace(/[０-９]/g, c => String.fromCharCode(c.charCodeAt(0)-65248)).replace(/\D/g,"");
   let nameMsg = "";
-  if(name && /\d/.test(name)) nameMsg = "姓名裡好像有數字，請再看一下";
+  if(!name) nameMsg = "請填寫聯絡姓名，我們才知道是誰要來喔";
+  else if(/\d/.test(name)) nameMsg = "姓名裡好像有數字，請再看一下";
   let phoneMsg = "";
   if(!digits) phoneMsg = "請填寫電話號碼";
   else if(digits.startsWith("09") && digits.length !== 10) phoneMsg = "手機號碼是 10 碼，目前是 " + digits.length + " 碼";
@@ -312,5 +305,4 @@ $("send").onclick = async () => {
 };
 </script>
 
-</body>
-</html>
+</body></html>
